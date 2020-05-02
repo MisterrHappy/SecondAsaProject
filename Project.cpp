@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
 
     scanf("%d %d", &markets, &citizens);
     
+    graph.~Graph();
 
     exit(EXIT_SUCCESS);
 }
