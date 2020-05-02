@@ -33,7 +33,8 @@ class Graph {
             int iD;
             for (int i = 1; i <= avenues; i++) {
                 for (int j = 1; j <= streets; j++) {
-                    iD = (i - 1) * streets + j;
+                    
+                    iD = (i - 1) * streets + j;  
                     if (i == 1 || i == avenues) {
                         if (i == 1) 
                             addEdge(iD, iD + streets);
@@ -51,7 +52,6 @@ class Graph {
                             addEdge(iD, iD - 1);
                             addEdge(iD, iD + 1);
                         }
-                        
                         continue;
                     }
                     
@@ -69,7 +69,6 @@ class Graph {
                             addEdge(iD, iD + streets);
                             addEdge(iD, iD - streets);
                         }
-
                         continue;
                     }
 
@@ -100,7 +99,6 @@ class Graph {
                     addEdge(i, (avenues * streets) + 2);
             }
         }
-
 };
 
 int main(int argc, char* argv[]) {
