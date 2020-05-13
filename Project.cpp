@@ -14,8 +14,7 @@ class Graph {
 
     private:
         int avenues, streets;
-        vector<int>* adj;
-        vector<int>* resAdj;
+        vector<int>* adj, *resAdj;
 
     public:
         Graph(int Avenues, int Streets) 
@@ -26,7 +25,6 @@ class Graph {
             delete[]adj;
             delete[]resAdj;
         }
-
 
         void buildGraph() {
             int iD, vertexes = avenues * streets;
@@ -67,6 +65,15 @@ class Graph {
             resAdj[vertex].push_back(capacity);
         }
 
+        void updateResAdj(int v, int vParent, int update) {
+            for (int i = 0; i < (int) adj[vParent].size(); i++) {
+                if (adj[vParent].at(i) == v) {
+                    resAdj[vParent].at(i) += update;
+                    break;
+                }
+            }
+        }
+
         bool bfs(int source, int sink, int parent[]) { 
            
             bool visited[sink + 1]; 
@@ -89,14 +96,12 @@ class Graph {
                         parent[adj[u].at(i)] = u; 
                         visited[adj[u].at(i)] = true; 
                         
-                         if (adj[u].at(i) == sink) {
-                            
+                         if (adj[u].at(i) == sink) 
                             return true;
-                         }
                     } 
                 }
             } 
-            return (visited[sink] == true);
+            return false;
         } 
 
         int fordFulkerson(int source, int sink) { 
@@ -108,29 +113,13 @@ class Graph {
                 for (v = sink; v != source; v = parent[v]) { 
                     u = parent[v];
 
-                    if (v == sink) {
-                        for (int i = 0; i < (int) adj[u].size(); i++) {
-                            if (adj[u].at(i) == v) {
-                                resAdj[u].at(i) -= 1;
-                                break;
-                            }
-                        }
+                    if (v != sink) {
+                        updateResAdj(v, u, -1);
+                        updateResAdj(u, v, 1);
                         continue;
                     }
-                    
-                    for (int i = 0; i < (int) adj[u].size(); i++) {
-                        if (adj[u].at(i) == v) {
-                            resAdj[u].at(i) -= 1;
-                            break;
-                        }
-                    }
+                    updateResAdj(v, u, -1);
 
-                    for (int i = 0; i < (int) adj[v].size(); i++) {
-                        if (adj[v].at(i) == u) {
-                            resAdj[v].at(i) += 1;
-                            break;
-                        }
-                    }
                 } 
                 max_flow += 1; 
                 memset(parent, 0, sizeof(parent));
