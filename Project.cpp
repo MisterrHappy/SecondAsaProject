@@ -36,86 +36,104 @@ class Graph {
                     
                     iD = (i - 1) * streets + j;
                     
-                    addEdge(iD, iD + vertexes);
-                    addEdge(iD + vertexes, iD);
+                    addEdge(iD, iD + vertexes, 1);
+                    addEdge(iD + vertexes, iD, 0);
                       
                     if (i == 1 || i == avenues) {
                         if (i == 1) {
-                            addEdge(iD + vertexes, iD + streets);
-                            addEdge(iD + streets, iD + vertexes);
+                            addEdge(iD + vertexes, iD + streets, 1);
+                            addEdge(iD + streets, iD + vertexes, 0);
                         }
                         
                         else if (i == avenues) {
-                            addEdge(iD + vertexes, iD - streets);
-                            addEdge(iD - streets, iD + vertexes);
+                            addEdge(iD + vertexes, iD - streets, 1);
+                            addEdge(iD - streets, iD + vertexes, 0);
                         }
 
                         if (j == 1) {
-                            addEdge(iD + vertexes, iD + 1);
-                            addEdge(iD + 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD + 1, 1);
+                            addEdge(iD + 1, iD + vertexes, 0);
                         }
                         
                         else if (j == streets) {
-                            addEdge(iD + vertexes, iD - 1);
-                            addEdge(iD - 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD - 1, 1);
+                            addEdge(iD - 1, iD + vertexes, 0);
                         }
                         
                         else {
-                            addEdge(iD + vertexes, iD - 1);
-                            addEdge(iD - 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD - 1, 1);
+                            addEdge(iD - 1, iD + vertexes, 0);
                             
-                            addEdge(iD + vertexes, iD + 1);
-                            addEdge(iD + 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD + 1, 1);
+                            addEdge(iD + 1, iD + vertexes, 0);
                         }
                         continue;
                     }
                     
                     if(j == 1 || j == streets){
                         if (j == 1) {
-                            addEdge(iD + vertexes, iD + 1);
-                            addEdge(iD + 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD + 1, 1);
+                            addEdge(iD + 1, iD + vertexes, 0);
                         }
                         
                         else if (j == streets) {
-                            addEdge(iD + vertexes, iD - 1);
-                            addEdge(iD - 1, iD + vertexes);
+                            addEdge(iD + vertexes, iD - 1, 1);
+                            addEdge(iD - 1, iD + vertexes, 0);
                         }
                         
                         if (i == avenues){
-                            addEdge(iD + vertexes, iD - streets);
-                            addEdge(iD - streets, iD + vertexes);
+                            addEdge(iD + vertexes, iD - streets, 1);
+                            addEdge(iD - streets, iD + vertexes, 0);
                         }
                         
                         else {
-                            addEdge(iD + vertexes, iD + streets);
-                            addEdge(iD + vertexes, iD - streets);
+                            addEdge(iD + vertexes, iD + streets, 1);
+                            addEdge(iD + vertexes, iD - streets, 0);
 
-                            addEdge(iD + streets, iD + vertexes);
-                            addEdge(iD - streets, iD + vertexes);
+                            addEdge(iD + streets, iD + vertexes, 1);
+                            addEdge(iD - streets, iD + vertexes, 0);
                         }
                         continue;
                     }
 
                     else { 
-                        addEdge(iD + vertexes, iD + 1);
-                        addEdge(iD + 1, iD + vertexes);
+                        addEdge(iD + vertexes, iD + 1, 1);
+                        addEdge(iD + 1, iD + vertexes, 0);
 
-                        addEdge(iD + vertexes, iD - 1);
-                        addEdge(iD - 1, iD + vertexes);
+                        addEdge(iD + vertexes, iD - 1, 1);
+                        addEdge(iD - 1, iD + vertexes, 0);
 
-                        addEdge(iD + vertexes, iD + streets);
-                        addEdge(iD + streets, iD + vertexes);
+                        addEdge(iD + vertexes, iD + streets, 1);
+                        addEdge(iD + streets, iD + vertexes, 0);
                         
-                        addEdge(iD + vertexes, iD - streets);
-                        addEdge(iD - streets, iD + vertexes);
+                        addEdge(iD + vertexes, iD - streets, 1);
+                        addEdge(iD - streets, iD + vertexes, 0);
                     }
                 }
             }
         }
 
-        void addEdge(int vertex, int edge) {
+        /* void printGraph() {
+            vector<int>::iterator j;
+            for (int i = 0; i < ((avenues * streets * 2) + 2); i++) {
+                for (j = adj[i].begin(); j != adj[i].end(); ++j) {
+                    cout << *j << "  ";
+                }
+                cout << "\n";
+            }
+            cout << "\n";
+
+            for (int i = 0; i < ((avenues * streets * 2) + 2); i++) {
+                for (j = resAdj[i].begin(); j != resAdj[i].end(); ++j) {
+                    cout << *j << "  ";
+                }
+                cout << "\n";
+            }
+        } */
+
+        void addEdge(int vertex, int edge, int capacity) {
             adj[vertex].push_back(edge);
-            resAdj[vertex].push_back(1);
+            resAdj[vertex].push_back(capacity);
         }
 
         int checkEdge(int index) {
@@ -140,54 +158,55 @@ class Graph {
                 int u = q.front(); 
                 q.pop(); 
                 
-                for (int i = 0; i < adj[u].size(); i++) {
+                for (unsigned int i = 0; i < adj[u].size(); i++) {
                     if (!visited[adj[u].at(i)] && resAdj[u].at(i) > 0 ) { 
                         q.push(adj[u].at(i)); 
                         parent[adj[u].at(i)] = u; 
                         visited[adj[u].at(i)] = true; 
                         
                         if (adj[u].at(i) == sink) {
-                            puts("entrei");
                             return true;
                         }
                     } 
                 }
             } 
-            puts("Boas");
             return false;
         } 
 
-        int fordFulkerson(int source, int sink, int citizens, int markets) { 
+        int fordFulkerson(int source, int sink) { 
 
             int u, v, parent[sink], max_flow = 0;
             
-            while (citizens != 0 || markets != 0) { 
+            while (bfs(source, sink, parent)) { 
                 
-                if (bfs(source, sink, parent)) {
-                    citizens--;
-                    markets--;
-                    
-                    for (v = sink; v != source; v = parent[v]) { 
-                        u = parent[v]; 
-                        
-                        for (int i = 0; i < adj[u].size(); i++) {
+                for (v = sink; v != source; v = parent[v]) { 
+                    u = parent[v];
+
+                    if (v == sink) {
+                        for (unsigned int i = 0; i < adj[u].size(); i++) {
                             if (adj[u].at(i) == v) {
                                 resAdj[u].at(i) -= 1;
-                                if (u != source && v != sink)
-                                    resAdj[v].at(i) += 1;
                                 break;
                             }
                         }
-                        if (v != sink) {
-                            resAdj[v].at(0) -= 1;
-                            resAdj[v - (avenues * streets)].at(0) += 1;
-                        }
-                    } 
-                    max_flow += 1;
+                        continue;
+                    }
                     
-                    continue;
+                    for (unsigned int i = 0; i < adj[u].size(); i++) {
+                        if (adj[u].at(i) == v) {
+                            resAdj[u].at(i) -= 1;
+                            break;
+                        }
+                    }
+
+                    for (unsigned int i = 0; i < adj[v].size(); i++) {
+                        if (adj[v].at(i) == v) {
+                            resAdj[v].at(i) += 1;
+                            break;
+                        }
+                    }
                 } 
-                return max_flow; 
+                max_flow += 1; 
             }  
             return max_flow;
         }
@@ -196,7 +215,7 @@ class Graph {
 
 int main(int argc, char* argv[]) {
 
-    int avenues, streets, markets, citizens, a, s, vertexes, marketsCpy, citizensCpy;
+    int avenues, streets, markets, citizens, a, s, vertexes;
 
     scanf("%d %d", &avenues, &streets);
 
@@ -207,20 +226,18 @@ int main(int argc, char* argv[]) {
 
     scanf("%d %d", &markets, &citizens);
 
-    marketsCpy = markets;
-    citizensCpy = citizens;
-
     while (markets-- != 0) {
         scanf("%d %d", &a, &s);
-        graph.addEdge(((a - 1) * streets + s) + vertexes, (vertexes * 2) + 1);
+        graph.addEdge(((a - 1) * streets + s) + vertexes, (vertexes * 2) + 1, 1);
     }
 
     while (citizens-- != 0) {
         scanf("%d %d", &a, &s);
-        graph.addEdge(0, (a - 1) * streets + s);
+        graph.addEdge(0, (a - 1) * streets + s, 1);
+        graph.addEdge((a - 1) * streets + s, 0, 0);
     }
 
-    cout << graph.fordFulkerson(0, (vertexes * 2) + 1, citizensCpy, marketsCpy) << endl;
+    cout << graph.fordFulkerson(0, (vertexes * 2) + 1) << endl;
 
     graph.~Graph();
 
