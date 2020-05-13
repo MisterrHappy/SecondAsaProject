@@ -10,76 +10,104 @@
 
 using namespace std;
 
-typedef struct Vertex {
-    bool citizens = false;
-    bool markets = false;
-    int weight = 1;
-
-} Vertex;
-
-
 class Graph {
 
     private:
         int avenues, streets;
         vector<int>* adj;
+        vector<int>* resAdj;
 
     public:
         Graph(int Avenues, int Streets) 
-        :  avenues(Avenues), streets(Streets), adj(new vector<int>[(Avenues * Streets) + 2]) {}
+        :  avenues(Avenues), streets(Streets), adj(new vector<int>[(Avenues * Streets * 2) + 2]),
+        resAdj(new vector<int>[(Avenues * Streets * 2) + 2]) {}
 
         ~Graph() {
             delete[]adj;
+            delete[]resAdj;
         }
 
+
         void buildGraph() {
-            int iD;
+            int iD, vertexes = avenues * streets;
+
             for (int i = 1; i <= avenues; i++) {
                 for (int j = 1; j <= streets; j++) {
                     
-                    iD = (i - 1) * streets + j;  
+                    iD = (i - 1) * streets + j;
+                    
+                    addEdge(iD, iD + vertexes);
+                    addEdge(iD + vertexes, iD);
+                      
                     if (i == 1 || i == avenues) {
-                        if (i == 1) 
-                            addEdge(iD, iD + streets);
+                        if (i == 1) {
+                            addEdge(iD + vertexes, iD + streets);
+                            addEdge(iD + streets, iD + vertexes);
+                        }
                         
-                        else if (i == avenues)
-                            addEdge(iD, iD - streets);
+                        else if (i == avenues) {
+                            addEdge(iD + vertexes, iD - streets);
+                            addEdge(iD - streets, iD + vertexes);
+                        }
 
-                        if (j == 1) 
-                            addEdge(iD, iD + 1);
+                        if (j == 1) {
+                            addEdge(iD + vertexes, iD + 1);
+                            addEdge(iD + 1, iD + vertexes);
+                        }
                         
-                        else if (j == streets) 
-                            addEdge(iD, iD - 1);
+                        else if (j == streets) {
+                            addEdge(iD + vertexes, iD - 1);
+                            addEdge(iD - 1, iD + vertexes);
+                        }
                         
                         else {
-                            addEdge(iD, iD - 1);
-                            addEdge(iD, iD + 1);
+                            addEdge(iD + vertexes, iD - 1);
+                            addEdge(iD - 1, iD + vertexes);
+                            
+                            addEdge(iD + vertexes, iD + 1);
+                            addEdge(iD + 1, iD + vertexes);
                         }
                         continue;
                     }
                     
                     if(j == 1 || j == streets){
-                        if (j == 1) 
-                            addEdge(iD, iD + 1);
+                        if (j == 1) {
+                            addEdge(iD + vertexes, iD + 1);
+                            addEdge(iD + 1, iD + vertexes);
+                        }
                         
-                        else if (j == streets)
-                            addEdge(iD, iD - 1);
+                        else if (j == streets) {
+                            addEdge(iD + vertexes, iD - 1);
+                            addEdge(iD - 1, iD + vertexes);
+                        }
                         
-                        if (i == avenues)
-                            addEdge(iD, iD - streets);
+                        if (i == avenues){
+                            addEdge(iD + vertexes, iD - streets);
+                            addEdge(iD - streets, iD + vertexes);
+                        }
                         
                         else {
-                            addEdge(iD, iD + streets);
-                            addEdge(iD, iD - streets);
+                            addEdge(iD + vertexes, iD + streets);
+                            addEdge(iD + vertexes, iD - streets);
+
+                            addEdge(iD + streets, iD + vertexes);
+                            addEdge(iD - streets, iD + vertexes);
                         }
                         continue;
                     }
 
                     else { 
-                        addEdge(iD, iD + 1);
-                        addEdge(iD, iD - 1);
-                        addEdge(iD, iD + streets);
-                        addEdge(iD, iD - streets);
+                        addEdge(iD + vertexes, iD + 1);
+                        addEdge(iD + 1, iD + vertexes);
+
+                        addEdge(iD + vertexes, iD - 1);
+                        addEdge(iD - 1, iD + vertexes);
+
+                        addEdge(iD + vertexes, iD + streets);
+                        addEdge(iD + streets, iD + vertexes);
+                        
+                        addEdge(iD + vertexes, iD - streets);
+                        addEdge(iD - streets, iD + vertexes);
                     }
                 }
             }
@@ -87,142 +115,113 @@ class Graph {
 
         void addEdge(int vertex, int edge) {
             adj[vertex].push_back(edge);
+            resAdj[vertex].push_back(1);
         }
 
-        void connectSource(vector<Vertex> vInfo) {
-            for (int i = 1; i <= (avenues * streets); i++) {
-                if (vInfo[i].citizens)
-                    addEdge(0, i);
-            }    
+        int checkEdge(int index) {
+            vector<int>::iterator i; 
+            for (i = adj[index].begin(); i != adj[index].end(); ++i) 
+                return *i;
+            return -1;
         }
 
-        void connectEnd(vector<Vertex> vInfo) {
-            for (int i = 1; i <= (avenues * streets); i++) {
-                if (vInfo[i].markets)
-                    addEdge(i, (avenues * streets) + 2);
-            }
-        }
-
-        bool bfs(int s, int t, int parent[]) { 
-
-            int v;
-            // Create a visited array and mark all vertices as not visited 
-            bool visited[(avenues * streets) + 2]; 
+        bool bfs(int source, int sink, int parent[]) { 
+           
+            bool visited[sink + 1]; 
             memset(visited, 0, sizeof(visited)); 
+
+            vector<int>::iterator i;
+            queue<int> q; 
+            q.push(source); 
+            visited[source] = true; 
+            parent[source] = -1; 
         
-            // Create a queue, enqueue source vertex and mark source vertex 
-            // as visited 
-            queue <int> q; 
-            q.push(s); 
-            visited[s] = true; 
-            parent[s] = -1; 
-        
-            // Standard BFS Loop 
             while (!q.empty()) { 
                 int u = q.front(); 
                 q.pop(); 
-
-                vector<int>::iterator i; 
-        
-                for (i = adj[u].begin(); i != adj[u].end(); ++i) { 
-                    v = *i;
-                    if (visited[v]==false && adj[u][v] > 0) { 
-                        q.push(v); 
-                        parent[v] = u; 
-                        visited[v] = true; 
+                
+                for (int i = 0; i < adj[u].size(); i++) {
+                    if (!visited[adj[u].at(i)] && resAdj[u].at(i) > 0 ) { 
+                        q.push(adj[u].at(i)); 
+                        parent[adj[u].at(i)] = u; 
+                        visited[adj[u].at(i)] = true; 
+                        
+                        if (adj[u].at(i) == sink) {
+                            puts("entrei");
+                            return true;
+                        }
                     } 
-                } 
+                }
             } 
-        
-            // If we reached sink in BFS starting from source, then return 
-            // true, else false 
-            return (visited[t] == true); 
+            puts("Boas");
+            return false;
         } 
-        
+
+        int fordFulkerson(int source, int sink, int citizens, int markets) { 
+
+            int u, v, parent[sink], max_flow = 0;
+            
+            while (citizens != 0 || markets != 0) { 
+                
+                if (bfs(source, sink, parent)) {
+                    citizens--;
+                    markets--;
+                    
+                    for (v = sink; v != source; v = parent[v]) { 
+                        u = parent[v]; 
+                        
+                        for (int i = 0; i < adj[u].size(); i++) {
+                            if (adj[u].at(i) == v) {
+                                resAdj[u].at(i) -= 1;
+                                if (u != source && v != sink)
+                                    resAdj[v].at(i) += 1;
+                                break;
+                            }
+                        }
+                        if (v != sink) {
+                            resAdj[v].at(0) -= 1;
+                            resAdj[v - (avenues * streets)].at(0) += 1;
+                        }
+                    } 
+                    max_flow += 1;
+                    
+                    continue;
+                } 
+                return max_flow; 
+            }  
+            return max_flow;
+        }
+
 };
-/* Returns true if there is a path from source 's' to sink 't' in 
-  residual graph. Also fills parent[] to store the path */
-  
-// Returns the maximum flow from s to t in the given graph 
-int fordFulkerson(int graph[V][V], int s, int t) 
-{ 
-    int u, v; 
-  
-    // Create a residual graph and fill the residual graph with 
-    // given capacities in the original graph as residual capacities 
-    // in residual graph 
-    int rGraph[V][V]; // Residual graph where rGraph[i][j] indicates  
-                     // residual capacity of edge from i to j (if there 
-                     // is an edge. If rGraph[i][j] is 0, then there is not)   
-    for (u = 0; u < V; u++) 
-        for (v = 0; v < V; v++) 
-             rGraph[u][v] = graph[u][v]; 
-  
-    int parent[V];  // This array is filled by BFS and to store path 
-  
-    int max_flow = 0;  // There is no flow initially 
-  
-    // Augment the flow while tere is path from source to sink 
-    while (bfs(rGraph, s, t, parent)) 
-    { 
-        // Find minimum residual capacity of the edges along the 
-        // path filled by BFS. Or we can say find the maximum flow 
-        // through the path found. 
-        int path_flow = INT_MAX; 
-        for (v=t; v!=s; v=parent[v]) 
-        { 
-            u = parent[v]; 
-            path_flow = min(path_flow, rGraph[u][v]); 
-        } 
-  
-        // update residual capacities of the edges and reverse edges 
-        // along the path 
-        for (v=t; v != s; v=parent[v]) 
-        { 
-            u = parent[v]; 
-            rGraph[u][v] -= path_flow; 
-            rGraph[v][u] += path_flow; 
-        } 
-  
-        // Add path flow to overall flow 
-        max_flow += path_flow; 
-    } 
-  
-    // Return the overall flow 
-    return max_flow; 
-} 
 
 int main(int argc, char* argv[]) {
 
-    int avenues, streets, markets, citizens, a, s, vertexes;
-
-    Vertex v;
-    vector<Vertex> vertexInfo;
+    int avenues, streets, markets, citizens, a, s, vertexes, marketsCpy, citizensCpy;
 
     scanf("%d %d", &avenues, &streets);
 
-    vertexes = (avenues * streets) + 2;
-
-    while (vertexes-- != 0)
-        vertexInfo.push_back(v);
+    vertexes = avenues * streets;
 
     Graph graph(avenues, streets);
     graph.buildGraph();
 
     scanf("%d %d", &markets, &citizens);
 
+    marketsCpy = markets;
+    citizensCpy = citizens;
+
     while (markets-- != 0) {
         scanf("%d %d", &a, &s);
-        vertexInfo.at((a - 1) * streets + s).markets = true;
+        graph.addEdge(((a - 1) * streets + s) + vertexes, (vertexes * 2) + 1);
     }
 
     while (citizens-- != 0) {
         scanf("%d %d", &a, &s);
-        vertexInfo.at((a - 1) * streets + s).citizens = true;
+        graph.addEdge(0, (a - 1) * streets + s);
     }
 
-    graph.connectSource(vertexInfo);
-    graph.connectEnd(vertexInfo);
+    cout << graph.fordFulkerson(0, (vertexes * 2) + 1, citizensCpy, marketsCpy) << endl;
+
     graph.~Graph();
 
     exit(EXIT_SUCCESS);
